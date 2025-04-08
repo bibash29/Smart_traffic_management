@@ -83,13 +83,13 @@ class Vehicle:
 
         # Check if the vehicle is approaching the intersection
         approaching = False
-        if self.direction == NORTH and 0 < self.y - self.intersection_y < 70:
+        if self.direction == NORTH and 0 < self.y - self.intersection_y < 100:
             approaching = True
-        elif self.direction == SOUTH and 0 < self.intersection_y - self.y < 70:
+        elif self.direction == SOUTH and 0 < self.intersection_y - self.y < 100:
             approaching = True
-        elif self.direction == EAST and 0 < self.intersection_x - self.x < 70:
+        elif self.direction == EAST and 0 < self.intersection_x - self.x < 100:
             approaching = True
-        elif self.direction == WEST and 0 < self.x - self.intersection_x < 70:
+        elif self.direction == WEST and 0 < self.x - self.intersection_x < 100:
             approaching = True
 
         # Check if the vehicle has passed the intersection
@@ -100,14 +100,20 @@ class Vehicle:
             (self.direction == WEST and self.x < self.intersection_x)
         )
 
-        # Stop the vehicle if the light is red, or it's too close to another vehicle
-        if (approaching and light.state in ["red", "yellow"] and not passed_intersection) or \
-        (lead_vehicle and min_gap < MIN_VEHICLE_GAP + VEHICLE_LENGTH):
-            self.moving = False
-            self.stopped = True
-        else:
+        # Ensure the vehicle keeps moving after passing the intersection
+        if passed_intersection:
             self.moving = True
             self.stopped = False
+        else:
+            # Stop the vehicle if the light is red, or it's too close to another vehicle
+            if (approaching and light.state in ["red", "yellow"] and not passed_intersection) or \
+            (lead_vehicle and min_gap < MIN_VEHICLE_GAP + VEHICLE_LENGTH):
+                self.moving = False
+                self.stopped = True
+            else:
+                self.moving = True
+                self.stopped = False
+        
 
         # Move the vehicle if it's allowed
         if self.moving:
