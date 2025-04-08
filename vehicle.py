@@ -100,20 +100,23 @@ class Vehicle:
             (self.direction == WEST and self.x < self.intersection_x)
         )
 
-        # Ensure the vehicle keeps moving after passing the intersection
-        if passed_intersection:
-            self.moving = True
-            self.stopped = False
-        else:
-            # Stop the vehicle if the light is red, or it's too close to another vehicle
-            if (approaching and light.state in ["red", "yellow"] and not passed_intersection) or \
-            (lead_vehicle and min_gap < MIN_VEHICLE_GAP + VEHICLE_LENGTH):
-                self.moving = False
-                self.stopped = True
-            else:
+        
+        # Stop the vehicle if the light is red, or it's too close to another vehicle
+        if (approaching and light.state in ["red", "yellow"] and not passed_intersection) or \
+        (lead_vehicle and min_gap < MIN_VEHICLE_GAP + VEHICLE_LENGTH):
+            self.moving = False
+            self.stopped = True
+            if ((self.direction == NORTH and 0 < self.y - self.intersection_y < 70) or \
+            (self.direction == SOUTH and 0 < self.intersection_y - self.y < 70) or \
+            (self.direction == EAST and 0 < self.intersection_x - self.x < 70) or     
+            (self.direction == WEST and 0 < self.x - self.intersection_x < 70)):
                 self.moving = True
                 self.stopped = False
-        
+        else:
+            if not self.moving:  # Only delay if vehicle was previously stopped
+                self.canvas.after(1000, lambda: setattr(self, 'moving', True))
+                self.stopped = False  # Reset stopped flag immediatel
+    
 
         # Move the vehicle if it's allowed
         if self.moving:
